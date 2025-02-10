@@ -1,1 +1,62 @@
-this is exampke
+class NFA:
+    def __init__(self):
+        self.transitions = {}  # Dictionary to hold transitions
+        self.epsilon_transitions = {}  # Dictionary to hold epsilon transitions
+        self.states = set()  # Set to hold all states
+
+    def add_transition(self, state_from, symbol, state_to):
+        if (state_from, symbol) not in self.transitions:
+            self.transitions[(state_from, symbol)] = []
+        self.transitions[(state_from, symbol)].append(state_to)
+        self.states.add(state_from)
+        self.states.add(state_to)
+
+    def add_epsilon_transition(self, state_from, state_to):
+        if state_from not in self.epsilon_transitions:
+            self.epsilon_transitions[state_from] = []
+        self.epsilon_transitions[state_from].append(state_to)
+        self.states.add(state_from)
+        self.states.add(state_to)
+
+    def epsilon_closure(self, state):
+        closure = set()
+        stack = [state]
+        closure.add(state)
+
+        while stack:
+            current_state = stack.pop()
+            if current_state in self.epsilon_transitions:
+                for next_state in self.epsilon_transitions[current_state]:
+                    if next_state not in closure:
+                        closure.add(next_state)
+                        stack.append(next_state)
+
+        return closure
+
+    def compute_epsilon_closures(self):
+        closures = {}
+        for state in self.states:
+            closures[state] = self.epsilon_closure(state)
+        return closures
+
+
+# Example usage
+if __name__ == "__main__":
+    nfa = NFA()
+    
+    # Adding epsilon transitions
+    nfa.add_epsilon_transition('q0', 'q1')
+    nfa.add_epsilon_transition('q1', 'q2')
+    nfa.add_epsilon_transition('q2', 'q3')
+    
+    # Adding regular transitions
+    nfa.add_transition('q0', 'a', 'q0')
+    nfa.add_transition('q1', 'b', 'q1')
+    nfa.add_transition('q2', 'c', 'q2')
+    
+    # Compute ε-closures
+    closures = nfa.compute_epsilon_closures()
+    
+    # Print ε-closures
+    for state, closure in closures.items():
+        print(f"ε-closure({state}) = {closure}")
